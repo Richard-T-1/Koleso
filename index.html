@@ -22,7 +22,8 @@
     
     .container {
       text-align: center;
-      max-width: 700px;
+      max-width: 100%;
+      width: 700px;
       padding: 20px;
     }
     
@@ -32,8 +33,10 @@
     
     .wheel-container {
       position: relative;
-      width: 500px;
-      height: 500px;
+      width: 90vw;
+      max-width: 500px;
+      height: 90vw;
+      max-height: 500px;
       margin: 40px auto;
       display: none;
     }
@@ -44,7 +47,6 @@
       border-radius: 50%;
       position: relative;
       overflow: hidden;
-      /* Upravené: predĺžená doba rotácie na 8s a zmenená krivka pre plynulejšie spomalenie */
       transition: transform 8s cubic-bezier(0.32, 0.94, 0.60, 1);
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
       background-color: white;
@@ -64,8 +66,8 @@
       position: absolute;
       top: 0;
       left: 0;
-      width: 250px;
-      height: 250px;
+      width: 50%;
+      height: 50%;
       transform-origin: bottom right;
     }
     
@@ -74,15 +76,17 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      width: 120px;
-      height: 120px;
+      width: 24%;
+      max-width: 120px;
+      height: 24%;
+      max-height: 120px;
       background-color: #0C8ED0;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 16px;
       color: white;
       z-index: 10;
       box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
@@ -132,7 +136,8 @@
       background-color: white;
       padding: 30px;
       border-radius: 8px;
-      width: 300px;
+      width: 90%;
+      max-width: 300px;
       text-align: center;
       color: #333;
     }
@@ -218,6 +223,37 @@
     .admin-input {
       padding: 8px;
       margin-right: 10px;
+    }
+    
+    /* Media queries for smaller screens */
+    @media (max-width: 600px) {
+      .container {
+        padding: 10px;
+      }
+      
+      .wheel-container {
+        margin: 20px auto;
+      }
+      
+      .wheel-center {
+        font-size: 14px;
+      }
+      
+      h1 {
+        font-size: 24px;
+      }
+      
+      .greeting {
+        font-size: 20px;
+      }
+      
+      .result-label {
+        font-size: 16px;
+      }
+      
+      .info-label {
+        font-size: 14px;
+      }
     }
   </style>
 </head>
@@ -332,14 +368,19 @@
         wheel.innerHTML = '';
         
         const segmentAngle = 360 / sections.length;
-        const radius = 250;
+        // Calculate radius based on container size for responsive design
+        const containerWidth = wheelContainer.clientWidth;
+        const radius = containerWidth / 2;
         const svgNS = "http://www.w3.org/2000/svg";
         
         // Vytvorenie SVG elementu
         const svg = document.createElementNS(svgNS, "svg");
         svg.setAttribute("width", "100%");
         svg.setAttribute("height", "100%");
-        svg.setAttribute("viewBox", "0 0 500 500");
+        svg.setAttribute("viewBox", "0 0 " + containerWidth + " " + containerWidth);
+        
+        const centerX = containerWidth / 2;
+        const centerY = containerWidth / 2;
         
         // Vytvorenie každého segmentu ako path v SVG
         for (let i = 0; i < sections.length; i++) {
@@ -349,14 +390,14 @@
           const startRad = (startAngle - 90) * Math.PI / 180;
           const endRad = (endAngle - 90) * Math.PI / 180;
           
-          const x1 = 250 + radius * Math.cos(startRad);
-          const y1 = 250 + radius * Math.sin(startRad);
-          const x2 = 250 + radius * Math.cos(endRad);
-          const y2 = 250 + radius * Math.sin(endRad);
+          const x1 = centerX + radius * Math.cos(startRad);
+          const y1 = centerY + radius * Math.sin(startRad);
+          const x2 = centerX + radius * Math.cos(endRad);
+          const y2 = centerY + radius * Math.sin(endRad);
           
           // Vytvorenie path pre segment
           const path = document.createElementNS(svgNS, "path");
-          path.setAttribute("d", `M 250 250 L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`);
+          path.setAttribute("d", `M ${centerX} ${centerY} L ${x1} ${y1} A ${radius} ${radius} 0 0 1 ${x2} ${y2} Z`);
           path.setAttribute("fill", sections[i].color);
           path.setAttribute("stroke", "white");
           path.setAttribute("stroke-width", "1");
@@ -367,15 +408,15 @@
           // Pridanie textu
           const midAngle = (startAngle + endAngle) / 2 - 90;
           const midRad = midAngle * Math.PI / 180;
-          const textDistance = 190;
-          const textX = 250 + textDistance * Math.cos(midRad);
-          const textY = 250 + textDistance * Math.sin(midRad);
+          const textDistance = radius * 0.76; // Position text at 76% of radius from center
+          const textX = centerX + textDistance * Math.cos(midRad);
+          const textY = centerY + textDistance * Math.sin(midRad);
           
           const text = document.createElementNS(svgNS, "text");
           text.setAttribute("x", textX);
           text.setAttribute("y", textY);
           text.setAttribute("fill", "white");
-          text.setAttribute("font-size", "14");
+          text.setAttribute("font-size", radius * 0.056); // Responsive font size
           text.setAttribute("font-weight", "bold");
           text.setAttribute("text-anchor", "middle");
           text.setAttribute("dominant-baseline", "middle");
@@ -495,6 +536,7 @@
         }
         
         let html = "<h4>Posledné výsledky:</h4>";
+        html += "<div style='overflow-x: auto;'>";
         html += "<table style='width: 100%; border-collapse: collapse;'>";
         html += "<tr><th style='border: 1px solid #ddd; padding: 8px;'>Meno</th><th style='border: 1px solid #ddd; padding: 8px;'>Výhra</th><th style='border: 1px solid #ddd; padding: 8px;'>Dátum</th><th style='border: 1px solid #ddd; padding: 8px;'>Čas</th></tr>";
         
@@ -508,6 +550,7 @@
         });
         
         html += "</table>";
+        html += "</div>";
         adminResults.innerHTML = html;
       }
       
@@ -556,6 +599,13 @@
         // Vytvorenie kolesa
         createWheel();
         updateWheelCenter();
+      });
+      
+      // Handle window resize
+      window.addEventListener('resize', function() {
+        if (wheelContainer.style.display !== 'none') {
+          createWheel();
+        }
       });
       
       // Po kliknutí na stred kolesa
